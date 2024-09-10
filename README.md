@@ -1,5 +1,6 @@
-### C++ wrapper for the well-known curl library (written in C).
+# C++ wrapper for the well-known curl library (written in C).
 
+### Code example
 ```c++
 void test(Curlex& cx) {
     auto request = Request()
