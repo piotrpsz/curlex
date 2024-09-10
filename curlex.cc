@@ -64,7 +64,7 @@ std::optional<Response> Curlex::GET(Request const& req) const noexcept {
 //-------------------------------------------------------------------
 std::optional<Response> Curlex::POST(Request const& req) const noexcept {
     // Guarantees CURL handle reset upon exiting the function.
-    Guard guard(handle_);
+//    Guard guard(handle_);
 
     auto body_buffer_ptr = set_data_buffer();
     auto headers_buffer_ptr = set_headers_buffer();
