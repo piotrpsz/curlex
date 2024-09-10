@@ -57,6 +57,11 @@ std::optional<Response> Curlex::GET(Request const& req) const noexcept {
             .headers(std::move(*headers_buffer_ptr));
 }
 
+//-------------------------------------------------------------------
+/// Execute POST command for the request.
+/// \param req - request to execute
+/// \return optional response with data received from the server.
+//-------------------------------------------------------------------
 std::optional<Response> Curlex::POST(Request const& req) const noexcept {
     // Guarantees CURL handle reset upon exiting the function.
     Guard guard(handle_);
@@ -123,6 +128,11 @@ std::optional<Response> Curlex::POST(Request const& req) const noexcept {
             .headers(std::move(*headers_buffer_ptr));
 }
 
+//-------------------------------------------------------------------
+/// Execute OPTIONS command for the request.
+/// \param req - request to execute
+/// \return optional response with data received from the server.
+//-------------------------------------------------------------------
 std::optional<Response> Curlex::OPTIONS(Request const& req) const noexcept {
     // Guarantees CURL handle reset upon exiting the function.
     Guard guard(handle_);
