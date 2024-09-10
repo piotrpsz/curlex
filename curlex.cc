@@ -70,16 +70,21 @@ std::optional<Response> Curlex::POST(Request const& req) const noexcept {
     auto headers_buffer_ptr = set_headers_buffer();
     struct curl_slist* const headers = set_headers_list(req.headers());
 
+    // Set option URL.
+    if (auto err = curl_easy_setopt(handle_, CURLOPT_URL, req.url().c_str()); err) {
+        fmt::print(stderr, "POST: {}\n", curl_easy_strerror(err));
+        return {};
+    }
     // Set option POST.
     if (auto err = curl_easy_setopt(handle_, CURLOPT_HTTPPOST, 1); err) {
         fmt::print(stderr, "POST: {}\n", curl_easy_strerror(err));
         return {};
     }
-
-    // Set option URL.
-    if (auto err = curl_easy_setopt(handle_, CURLOPT_URL, req.url().c_str()); err) {
-        fmt::print(stderr, "POST: {}\n", curl_easy_strerror(err));
-        return {};
+    if (!req.body().empty()) {
+        if (auto err = curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, req.body().c_str()); err) {
+            fmt::print(stderr, "POST: {}\n", curl_easy_strerror(err));
+            return {};
+        }
     }
 
     Data data{};
@@ -95,10 +100,10 @@ std::optional<Response> Curlex::POST(Request const& req) const noexcept {
             fmt::print(stderr, "{}\n", curl_easy_strerror(err));
             return {};
         }
-        if (auto const err = curl_easy_setopt(handle_, CURLOPT_POSTFIELDSIZE, req.data().size()); err) {
-            fmt::print(stderr, "{}\n", curl_easy_strerror(err));
-            return {};
-        }
+//        if (auto const err = curl_easy_setopt(handle_, CURLOPT_POSTFIELDSIZE, req.data().size()); err) {
+//            fmt::print(stderr, "{}\n", curl_easy_strerror(err));
+//            return {};
+//        }
     }
 
     // Set the verbose option if the request says so
@@ -119,8 +124,8 @@ std::optional<Response> Curlex::POST(Request const& req) const noexcept {
         return {};
     }
     // Release manually memory allocated for headers if they were used.
-    if (headers)
-        curl_slist_free_all(headers);
+//    if (headers)
+//        curl_slist_free_all(headers);
     // Data and header buffers should free memory automatically.
 
     return Response(code)
