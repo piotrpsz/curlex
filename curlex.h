@@ -29,8 +29,8 @@ public:
     [[nodiscard]] std::string version() const noexcept {
         return VersionInfo().version();
     }
-    VersionInfo info() const noexcept {
-        return VersionInfo();
+    [[nodiscard]] VersionInfo info() const noexcept {
+        return {};
     }
     [[nodiscard]] Curlex clone() const {
         return Curlex(curl_easy_duphandle(handle_));

@@ -8,6 +8,7 @@
 #include <glaze/glaze.hpp>
 
 struct VersionInfo {
+public:
     int edition{};
     std::string curl_version{};
     int version_number{};
@@ -64,7 +65,7 @@ struct VersionInfo {
     };
 
     VersionInfo();
-    std::string as_json() const;
+    [[nodiscard]] std::string as_json() const;
     void print() const noexcept;
 
     std::string version() && {
