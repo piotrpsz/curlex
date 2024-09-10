@@ -30,6 +30,12 @@ std::optional<Response> Curlex::GET(Request const& req) const noexcept {
         fmt::print(stderr, "GET: {}\n", curl_easy_strerror(err));
         return {};
     }
+    // Set the verbose option if the request says so
+    if (req.is_verbose())
+        if (auto err = curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1L); err) {
+            fmt::print(stderr, "{}\n", curl_easy_strerror(err));
+            return {};
+        }
     // And run
     if (auto err = curl_easy_perform(handle_); err) {
         fmt::print(stderr, "GET: {}\n", curl_easy_strerror(err));
@@ -41,7 +47,6 @@ std::optional<Response> Curlex::GET(Request const& req) const noexcept {
         fmt::print(stderr, "GET: {}\n", curl_easy_strerror(err));
         return {};
     }
-
     // Release manually memory allocated for headers if they were used.
     if (headers)
         curl_slist_free_all(headers);
@@ -51,6 +56,118 @@ std::optional<Response> Curlex::GET(Request const& req) const noexcept {
             .body(std::move(*body_buffer_ptr))
             .headers(std::move(*headers_buffer_ptr));
 }
+
+std::optional<Response> Curlex::POST(Request const& req) const noexcept {
+    // Guarantees CURL handle reset upon exiting the function.
+    Guard guard(handle_);
+
+    auto body_buffer_ptr = set_data_buffer();
+    auto headers_buffer_ptr = set_headers_buffer();
+    struct curl_slist* const headers = set_headers_list(req.headers());
+
+    // Set option POST.
+    if (auto err = curl_easy_setopt(handle_, CURLOPT_HTTPPOST, 1); err) {
+        fmt::print(stderr, "POST: {}\n", curl_easy_strerror(err));
+        return {};
+    }
+
+    // Set option URL.
+    if (auto err = curl_easy_setopt(handle_, CURLOPT_URL, req.url().c_str()); err) {
+        fmt::print(stderr, "POST: {}\n", curl_easy_strerror(err));
+        return {};
+    }
+
+    Data data{};
+    if (!req.data().empty()) {
+        data.ptr = req.data().c_str();
+        data.left = req.data().size();
+
+        if (auto const err = curl_easy_setopt(handle_, CURLOPT_READFUNCTION, data_reader); err) {
+            fmt::print(stderr, "{}\n", curl_easy_strerror(err));
+            return {};
+        }
+        if (auto const err = curl_easy_setopt(handle_, CURLOPT_READDATA, &data); err) {
+            fmt::print(stderr, "{}\n", curl_easy_strerror(err));
+            return {};
+        }
+        if (auto const err = curl_easy_setopt(handle_, CURLOPT_POSTFIELDSIZE, req.data().size()); err) {
+            fmt::print(stderr, "{}\n", curl_easy_strerror(err));
+            return {};
+        }
+    }
+
+    // Set the verbose option if the request says so
+    if (req.is_verbose())
+        if (auto err = curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1L); err) {
+            fmt::print(stderr, "{}\n", curl_easy_strerror(err));
+            return {};
+        }
+    // And run
+    if (auto err = curl_easy_perform(handle_); err) {
+        fmt::print(stderr, "GET: {}\n", curl_easy_strerror(err));
+        return {};
+    }
+    // Getting the response code sent by the server.
+    long code{};
+    if (auto err = curl_easy_getinfo(handle_, CURLINFO_RESPONSE_CODE, &code); err) {
+        fmt::print(stderr, "GET: {}\n", curl_easy_strerror(err));
+        return {};
+    }
+    // Release manually memory allocated for headers if they were used.
+    if (headers)
+        curl_slist_free_all(headers);
+    // Data and header buffers should free memory automatically.
+
+    return Response(code)
+            .body(std::move(*body_buffer_ptr))
+            .headers(std::move(*headers_buffer_ptr));
+}
+
+std::optional<Response> Curlex::OPTIONS(Request const& req) const noexcept {
+    // Guarantees CURL handle reset upon exiting the function.
+    Guard guard(handle_);
+
+    auto body_buffer_ptr = set_data_buffer();
+    auto headers_buffer_ptr = set_headers_buffer();
+    struct curl_slist* const headers = set_headers_list(req.headers());
+
+    // Set option OPTIONS
+    if (auto err = curl_easy_setopt(handle_, CURLOPT_CUSTOMREQUEST, "OPTIONS"); err) {
+        fmt::print(stderr, "{}\n", curl_easy_strerror(err));
+        return {};
+    }
+    // Set URL.
+    if (auto err = curl_easy_setopt(handle_, CURLOPT_URL, req.url().c_str()); err) {
+        fmt::print(stderr, "GET: {}\n", curl_easy_strerror(err));
+        return {};
+    }
+    // Set the verbose option if the request says so
+    if (req.is_verbose())
+        if (auto err = curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1L); err) {
+            fmt::print(stderr, "{}\n", curl_easy_strerror(err));
+            return {};
+        }
+    // And run
+    if (auto err = curl_easy_perform(handle_); err) {
+        fmt::print(stderr, "GET: {}\n", curl_easy_strerror(err));
+        return {};
+    }
+    // Getting the response code sent by the server.
+    long code{};
+    if (auto err = curl_easy_getinfo(handle_, CURLINFO_RESPONSE_CODE, &code); err) {
+        fmt::print(stderr, "GET: {}\n", curl_easy_strerror(err));
+        return {};
+    }
+    // Release manually memory allocated for headers if they were used.
+    if (headers)
+        curl_slist_free_all(headers);
+    // Data and header buffers should free memory automatically.
+
+    return Response(code)
+            .body(std::move(*body_buffer_ptr))
+            .headers(std::move(*headers_buffer_ptr));
+}
+
 
 /********************************************************************
 *                                                                   *

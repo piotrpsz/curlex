@@ -32,7 +32,9 @@ public:
         curl_easy_setopt(handle_, CURLOPT_QUICK_EXIT, 1L);
     }
 
-    std::optional<Response> GET(Request const& req) const noexcept;
+    [[nodiscard]] std::optional<Response> GET(Request const& req) const noexcept;
+    [[nodiscard]] std::optional<Response> POST(Request const& req) const noexcept;
+    [[nodiscard]] std::optional<Response> OPTIONS(Request const& req) const noexcept;
 
 private:
     explicit Curlex(CURL* handle) : handle_{handle} {}
