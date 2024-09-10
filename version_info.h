@@ -25,8 +25,10 @@
  *  Author: Piotr Pszczółkowski (piotr@beesoft.pl)
  *  Created: 2024/09/10
  */
-
 #pragma once
+
+/*------- include files:
+-------------------------------------------------------------------*/
 #include <string>
 #include <vector>
 #include <glaze/glaze.hpp>
