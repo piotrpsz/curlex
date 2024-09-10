@@ -2,6 +2,11 @@
 
 ### Code example
 ```c++
+Curlex cx;
+fmt::print("curl version: {}\n", cx.version());
+test(cx)
+......
+
 void test(Curlex& cx) {
     auto request = Request()
             .scheme("http")
