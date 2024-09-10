@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 #include <optional>
+#include "version_info.h"
 #include "request.h"
 #include "response.h"
 
@@ -25,6 +26,9 @@ public:
         curl_global_cleanup();
     }
 
+    std::string version() const noexcept {
+        return VersionInfo().version();
+    }
     [[nodiscard]] Curlex clone() const {
         return Curlex(curl_easy_duphandle(handle_));
     }
